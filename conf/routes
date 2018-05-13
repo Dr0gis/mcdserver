@@ -12,6 +12,8 @@ GET     /Test                                   App.Test
 POST    /Home                                   App.Home
 POST    /Registration                           TokenController.Register
 POST    /Authorization                          TokenController.Auth
+POST    /RegistrationAdmin                      TokenController.RegisterAdmin
+POST    /AuthorizationAdmin                     TokenController.AuthAdmin
 GET     /Statistics                             StatisticsController.Statistics
 
 # Ignore favicon requests

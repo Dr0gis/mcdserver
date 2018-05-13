@@ -18,7 +18,7 @@ type UserBl struct {
 	cryptedPassword string
 }
 
-func NewUserBl (email string, password string) UserBl {
+func NewUserBl(email string, password string) UserBl {
 	userBl := UserBl {email: email, password: password}
 	userBl.cryptPassword()
 	return userBl
@@ -109,6 +109,10 @@ func (userBl UserBl) Registration() error {
 		app.Logs.Print(lower)
 		app.Logs.Print(upper)
 		return errors.New("password must contain number, lower, upper and length more or 7")
+	}
+
+	if userBl.email == "" {
+		return errors.New("email must'n empty")
 	}
 
 	user, err := userBl.getUserFromDB()

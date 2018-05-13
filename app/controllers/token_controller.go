@@ -29,7 +29,7 @@ func ValidateToken(tokenString string) (bool, error) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
-		app.Logs.Print(claims["email"], claims["exp"])
+		app.Logs.Print(claims["admin"], claims["email"], claims["exp"])
 		return true, nil
 	} else {
 		return false, nil
@@ -78,6 +78,60 @@ func (controller TokenController) Register() revel.Result {
 	userbl := bl.NewUserBl(model.email, model.password)
 
 	err := userbl.Registration()
+
+	if err != nil {
+		app.Logs.Print(err)
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON(err.Error());
+	}
+
+	return controller.RenderJSON(nil)
+}
+
+type authAdminModel struct {
+	emailOrLogin string
+	password string
+}
+
+func (controller TokenController) AuthAdmin() revel.Result {
+	var jsonData map[string] string
+	controller.Params.BindJSON(&jsonData)
+
+	model := new(authAdminModel);
+	model.emailOrLogin = jsonData["emailOrLogin"]
+	model.password = jsonData["password"]
+
+	adminBl := bl.NewAdminBlEmailOrLogin(model.emailOrLogin, model.password)
+
+	tokenString, err := adminBl.GetToken()
+
+	if err != nil {
+		app.Logs.Print(err)
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON(err.Error());
+	}
+
+	return controller.RenderJSON(tokenString)
+}
+
+type registerAdminModel struct {
+	email string
+	login string
+	password string
+}
+
+func (controller TokenController) RegisterAdmin() revel.Result {
+	var jsonData map[string] string
+	controller.Params.BindJSON(&jsonData)
+
+	model := new(registerAdminModel)
+	model.email = jsonData["email"]
+	model.login = jsonData["login"]
+	model.password = jsonData["password"]
+
+	adminBl := bl.NewAdminBl(model.email, model.login, model.password)
+
+	err := adminBl.Registration()
 
 	if err != nil {
 		app.Logs.Print(err)
