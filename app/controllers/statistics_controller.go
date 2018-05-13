@@ -10,7 +10,26 @@ type StatisticsController struct {
 	*revel.Controller
 }
 
+type statisticsModel struct {
+	token string
+}
+
 func (controller StatisticsController) Statistics() revel.Result {
+	model := statisticsModel{}
+	model.token = controller.Params.Get("token");
+
+	tokenValid, err := ValidateToken(model.token)
+	if err != nil {
+		app.Logs.Print(err)
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON(err.Error());
+	}
+	if !tokenValid {
+		app.Logs.Print("token don't valid")
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON("token don't valid");
+	}
+
 	statisticsBl := bl.NewStatisticsBl()
 
 	users, err := statisticsBl.GetUsers()

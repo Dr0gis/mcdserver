@@ -125,9 +125,17 @@ func (adminBl AdminBl) GetToken() (string, error) {
 		return "", errors.New("password incorrect")
 	}
 
+	var emailOrLogin string
+	if adminBl.email == "" {
+		emailOrLogin = adminBl.login
+	}
+	if adminBl.login == "" {
+		emailOrLogin = adminBl.email
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims {
 		"admin": true,
-		"email": adminBl.email,
+		"email": emailOrLogin,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
