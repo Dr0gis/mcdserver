@@ -12,7 +12,7 @@ type TokenController struct {
 	*revel.Controller
 }
 
-func ValidateToken(tokenString string) (bool, error) {
+func ValidateToken(tokenString string) (isValid bool, isAdmin bool, email string, err error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
@@ -24,15 +24,17 @@ func ValidateToken(tokenString string) (bool, error) {
 	})
 
 	if err != nil {
-		return false, err
+		return false, false, "", err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
 		app.Logs.Print(claims["admin"], claims["email"], claims["exp"])
-		return true, nil
+		isAdminClaim := claims["admin"].(bool)
+		emailClaim := claims["email"].(string)
+		return true, isAdminClaim, emailClaim, nil
 	} else {
-		return false, nil
+		return false, false, "",nil
 	}
 }
 
@@ -140,4 +142,47 @@ func (controller TokenController) RegisterAdmin() revel.Result {
 	}
 
 	return controller.RenderJSON(nil)
+}
+
+type adminInfoModel struct {
+	token string
+}
+
+type adminInfoResponseModel struct {
+	Email string `json:"email"`
+	Login string `json:"login"`
+}
+
+func (controller TokenController) AdminInfo() revel.Result {
+	model := adminInfoModel{}
+	model.token = controller.Params.Get("token")
+
+	tokenValid, isAdmin, email, err := ValidateToken(model.token)
+	if err != nil {
+		app.Logs.Print(err)
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON(err.Error());
+	}
+	if !tokenValid {
+		app.Logs.Print("token don't valid")
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON("token don't valid");
+	}
+	if !isAdmin {
+		app.Logs.Print("user not admin")
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON("user not admin");
+	}
+
+	adminBL := bl.NewAdminBlEmailOrLogin(email, "")
+
+	adminInfoResponseModel := new(adminInfoResponseModel)
+	adminInfoResponseModel.Email, adminInfoResponseModel.Login, err = adminBL.GetEmailAndLogin()
+	if err != nil {
+		app.Logs.Print(err)
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON(err.Error());
+	}
+
+	return controller.RenderJSON(adminInfoResponseModel)
 }

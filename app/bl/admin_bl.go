@@ -48,11 +48,8 @@ func (adminBl *AdminBl) cryptPassword() {
 func (adminBl AdminBl) getAdminFromDB() (models.Admin, error) {
 	adminDao := new(dao.AdminDao)
 
-	var loginOrEmail string
-	if adminBl.login == "" {
-		loginOrEmail = adminBl.email
-	}
-	if adminBl.email == "" {
+	loginOrEmail := adminBl.email
+	if loginOrEmail == "" {
 		loginOrEmail = adminBl.login
 	}
 
@@ -179,4 +176,13 @@ func (adminBl AdminBl) Registration() error {
 	}
 
 	return nil
+}
+
+func (adminBl AdminBl) GetEmailAndLogin() (email string, login string, err error) {
+	admin, err := adminBl.getAdminFromDB()
+	if err != nil {
+		return "", "", err
+	}
+
+	return admin.Email, admin.Login, nil
 }

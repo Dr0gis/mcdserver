@@ -14,7 +14,10 @@ POST    /Registration                           TokenController.Register
 POST    /Authorization                          TokenController.Auth
 POST    /RegistrationAdmin                      TokenController.RegisterAdmin
 POST    /AuthorizationAdmin                     TokenController.AuthAdmin
+GET     /AdminInfo                              TokenController.AdminInfo
 GET     /Statistics                             StatisticsController.Statistics
+GET     /Drones                                 DronesController.Drones
+POST    /AddDrone                               DronesController.AddDrone
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

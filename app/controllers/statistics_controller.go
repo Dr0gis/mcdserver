@@ -18,7 +18,7 @@ func (controller StatisticsController) Statistics() revel.Result {
 	model := statisticsModel{}
 	model.token = controller.Params.Get("token");
 
-	tokenValid, err := ValidateToken(model.token)
+	tokenValid, isAdmin, _, err := ValidateToken(model.token)
 	if err != nil {
 		app.Logs.Print(err)
 		controller.Response.SetStatus(400)
@@ -28,6 +28,11 @@ func (controller StatisticsController) Statistics() revel.Result {
 		app.Logs.Print("token don't valid")
 		controller.Response.SetStatus(400)
 		return controller.RenderJSON("token don't valid");
+	}
+	if !isAdmin {
+		app.Logs.Print("user not admin")
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON("user not admin");
 	}
 
 	statisticsBl := bl.NewStatisticsBl()
