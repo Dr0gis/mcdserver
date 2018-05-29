@@ -90,6 +90,49 @@ func (controller TokenController) Register() revel.Result {
 	return controller.RenderJSON(nil)
 }
 
+type userInfoModel struct {
+	token string
+}
+
+type userInfoResponseModel struct {
+	Email string `json:"email"`
+	Name string `json:"name"`
+	Surname string `json:"surname"`
+}
+
+func (controller TokenController) UserInfo() revel.Result {
+	model := userInfoModel{}
+	model.token = controller.Params.Get("token")
+
+	tokenValid, _, email, err := ValidateToken(model.token)
+	if err != nil {
+		app.Logs.Print(err)
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON(err.Error());
+	}
+	if !tokenValid {
+		app.Logs.Print("token don't valid")
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON("token don't valid");
+	}
+
+	userBl := bl.NewUserBl(email, "")
+
+	userModel, err := userBl.GetInfo()
+	userInfoResponseModel := new(userInfoResponseModel)
+	userInfoResponseModel.Email = userModel.Email
+	userInfoResponseModel.Name = userModel.Name
+	userInfoResponseModel.Surname = userModel.Surname
+
+	if err != nil {
+		app.Logs.Print(err)
+		controller.Response.SetStatus(400)
+		return controller.RenderJSON(err.Error());
+	}
+
+	return controller.RenderJSON(userInfoResponseModel)
+}
+
 type authAdminModel struct {
 	emailOrLogin string
 	password string
@@ -99,7 +142,7 @@ func (controller TokenController) AuthAdmin() revel.Result {
 	var jsonData map[string] string
 	controller.Params.BindJSON(&jsonData)
 
-	model := new(authAdminModel);
+	model := new(authAdminModel)
 	model.emailOrLogin = jsonData["emailOrLogin"]
 	model.password = jsonData["password"]
 

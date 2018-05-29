@@ -12,12 +12,24 @@ GET     /Test                                   App.Test
 POST    /Home                                   App.Home
 POST    /Registration                           TokenController.Register
 POST    /Authorization                          TokenController.Auth
+GET     /UserInfo                               TokenController.UserInfo
 POST    /RegistrationAdmin                      TokenController.RegisterAdmin
 POST    /AuthorizationAdmin                     TokenController.AuthAdmin
 GET     /AdminInfo                              TokenController.AdminInfo
 GET     /Statistics                             StatisticsController.Statistics
 GET     /Drones                                 DronesController.Drones
 POST    /AddDrone                               DronesController.AddDrone
+GET     /ZonePoints                             ZonePointController.ZonePoints
+POST    /ClearZonePoints                        ZonePointController.ClearZonePoints
+PUT     /UpdateZonePoints                       ZonePointController.UpdateZonePoints
+GET     /UsedDrones                             DroneActivationController.UsedDronesForUser
+GET     /DroneMovements                         DroneMovementController.DroneMovementForDroneActivation
+GET     /CheckActivateDrone                     DroneActivationController.CheckActivateDrone
+POST    /ActivateDrone                          DroneActivationController.ActivateDrone
+GET     /DeactivateDrone                        DroneActivationController.DeactivateDrone
+POST    /AddDroneMovement                       DroneMovementController.InsertDroneMovement
+GET     /UsersList                              StatisticsController.UsersList
+GET     /Events                                 StatisticsController.Events
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

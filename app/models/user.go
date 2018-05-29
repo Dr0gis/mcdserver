@@ -1,14 +1,15 @@
 package models
 
 type User struct {
+	Id		 int    `json:"id"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Name     string `json:"name"`
 	Surname  string `json:"surname"`
 }
 
-func NewUser(email string, password string, name string, surname string) User {
-	return User{Email: email, Password: password, Name: name, Surname: surname}
+func NewUser(id int, email string, password string, name string, surname string) User {
+	return User{Id: id, Email: email, Password: password, Name: name, Surname: surname}
 }
 
 func (user User) GetEmail() string {

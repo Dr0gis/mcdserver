@@ -39,7 +39,7 @@ func (userDao UserDao) GetAllUsers() ([]models.User, error) {
 
 	usersModel := make([]models.User, 0)
 	for _, user := range users {
-		userModel := models.NewUser(user.email, user.password, user.name.String, user.surname.String)
+		userModel := models.NewUser(user.id, user.email, user.password, user.name.String, user.surname.String)
 		usersModel = append(usersModel, userModel)
 	}
 
@@ -68,7 +68,33 @@ func (userDao UserDao) GetUserByEmail(email string) (models.User, error) {
 		return models.User{}, errors.New("user not found")
 	}
 
-	userModel := models.NewUser(user.email, user.password, user.name.String, user.surname.String)
+	userModel := models.NewUser(user.id, user.email, user.password, user.name.String, user.surname.String)
+	return userModel, nil
+}
+
+func (userDao UserDao) GetUserByIdDroneActivation(idDroneActivation int) (models.User, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM mcddb.user WHERE mcddb.user.iduser IN (SELECT mcddb.dron_activation.iduser FROM mcddb.dron_activation WHERE mcddb.dron_activation.iddron_activation = %d);", idDroneActivation)
+
+	rows, err := selectQueryToDataBase(sqlQuery)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	user := new(userModelDB)
+	countRows := 0
+	for rows.Next() {
+		countRows++
+		err := rows.Scan(&user.id, &user.email, &user.password, &user.name, &user.surname)
+		if err != nil {
+			return models.User{}, err
+		}
+	}
+
+	if countRows == 0 {
+		return models.User{}, errors.New("user not found")
+	}
+
+	userModel := models.NewUser(user.id, user.email, user.password, user.name.String, user.surname.String)
 	return userModel, nil
 }
 

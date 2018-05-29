@@ -36,11 +36,63 @@ func (droneDao DroneDao) GetAllDrones() ([]models.Drone, error) {
 
 	dronesModel := make([]models.Drone, 0)
 	for _, drone := range drones {
-		droneModel := models.NewDrone(drone.name, drone.qrcode)
+		droneModel := models.NewDrone(drone.id, drone.name, drone.qrcode)
 		dronesModel = append(dronesModel, droneModel)
 	}
 
 	return dronesModel, nil
+}
+
+func (droneDao DroneDao) GetDroneById(id int) (models.Drone, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM dron WHERE iddron = '%d'", id)
+
+	rows, err := selectQueryToDataBase(sqlQuery)
+	if err != nil {
+		return models.Drone{}, err
+	}
+
+	drone := new(droneModelDB)
+	countRows := 0
+	for rows.Next() {
+		countRows++
+		err := rows.Scan(&drone.id, &drone.qrcode, &drone.name)
+		if err != nil {
+			return models.Drone{}, err
+		}
+	}
+
+	if countRows == 0 {
+		return models.Drone{}, errors.New("drone not found")
+	}
+
+	droneModel := models.NewDrone(drone.id, drone.name, drone.qrcode)
+	return droneModel, nil
+}
+
+func (droneDao DroneDao) GetDroneByQrCode(qrcode string) (models.Drone, error) {
+	sqlQuery := fmt.Sprintf("SELECT * FROM dron WHERE qrcode = '%s'", qrcode)
+
+	rows, err := selectQueryToDataBase(sqlQuery)
+	if err != nil {
+		return models.Drone{}, err
+	}
+
+	drone := new(droneModelDB)
+	countRows := 0
+	for rows.Next() {
+		countRows++
+		err := rows.Scan(&drone.id, &drone.qrcode, &drone.name)
+		if err != nil {
+			return models.Drone{}, err
+		}
+	}
+
+	if countRows == 0 {
+		return models.Drone{}, errors.New("drone not found")
+	}
+
+	droneModel := models.NewDrone(drone.id, drone.name, drone.qrcode)
+	return droneModel, nil
 }
 
 func (droneDao DroneDao) InsertDrone(name string, qrcode string) error {

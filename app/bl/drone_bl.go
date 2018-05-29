@@ -23,6 +23,11 @@ func NewDroneBl(name string) DroneBl {
 	return droneBl
 }
 
+func NewDroneByQrCodeBl(qrcode string) DroneBl {
+	droneBl := DroneBl{qrcode: qrcode}
+	return droneBl
+}
+
 func (droneBl DroneBl) getDronesFromDB() ([]models.Drone, error) {
 	droneDao := new(dao.DroneDao)
 
@@ -40,7 +45,7 @@ func (droneBl DroneBl) GetDrones() ([]models.Drone, error) {
 	return drones, nil
 }
 
-func (droneBl DroneBl) InsertDroneInDB() error {
+func (droneBl DroneBl) insertDroneInDB() error {
 	droneDao := new(dao.DroneDao)
 
 	err := droneDao.InsertDrone(droneBl.name, droneBl.qrcode)
@@ -61,10 +66,28 @@ func (droneBl DroneBl) AddNewDrone() error {
 
 	droneBl.createQrCode()
 
-	err := droneBl.InsertDroneInDB()
+	err := droneBl.insertDroneInDB()
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (droneBl DroneBl) getDroneByQrCodeFromDB() (models.Drone, error) {
+	droneDao := new(dao.DroneDao)
+
+	drone, err := droneDao.GetDroneByQrCode(droneBl.qrcode)
+
+	return drone, err
+}
+
+func (droneBl DroneBl) GetDroneByQrCode() (models.Drone, error) {
+	if droneBl.qrcode == "" {
+		return models.Drone{}, errors.New("qrcode must'n empty")
+	}
+
+	drone, err := droneBl.getDroneByQrCodeFromDB()
+
+	return drone, err
 }

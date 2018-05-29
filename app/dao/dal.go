@@ -14,3 +14,13 @@ func insertQueryToDataBase(sqlQuery string) (sql.Result, error) {
 	result, err := app.DB.Exec(sqlQuery)
 	return result, err
 }
+
+func deleteQueryToDataBase(sqlQuery string) (sql.Result, error) {
+	result, err := app.DB.Exec(sqlQuery)
+	return result, err
+}
+
+func updateQueryToDataBase(sqlQuery string) (sql.Result, error) {
+	result, err := app.DB.Exec(sqlQuery)
+	return result, err
+}

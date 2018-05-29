@@ -128,3 +128,12 @@ func (userBl UserBl) Registration() error {
 
 	return nil
 }
+
+func (userBl UserBl) GetInfo() (user models.User, err error) {
+	user, err = userBl.getUserFromDB()
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return user, nil
+}

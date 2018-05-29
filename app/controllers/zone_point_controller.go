@@ -2,21 +2,21 @@ package controllers
 
 import (
 	"github.com/revel/revel"
-	"mcdserver/app/bl"
 	"mcdserver/app"
+	"mcdserver/app/bl"
 )
 
-type StatisticsController struct {
+type ZonePointController struct {
 	*revel.Controller
 }
 
-type usersListModel struct {
+type zonePointsModels struct {
 	token string
 }
 
-func (controller StatisticsController) UsersList() revel.Result {
-	model := usersListModel{}
-	model.token = controller.Params.Get("token");
+func (controller ZonePointController) ZonePoints() revel.Result {
+	model := zonePointsModels{}
+	model.token = controller.Params.Get("token")
 
 	tokenValid, isAdmin, _, err := ValidateToken(model.token)
 	if err != nil {
@@ -35,27 +35,28 @@ func (controller StatisticsController) UsersList() revel.Result {
 		return controller.RenderJSON("user not admin");
 	}
 
-	statisticsBl := bl.NewStatisticsBl()
+	zonePointBl := bl.NewZonePointEmptyBl()
 
-	users, err := statisticsBl.GetUsers()
+	zonePoints, err := zonePointBl.GetZonePoints()
 	if err != nil {
 		app.Logs.Print(err)
 		controller.Response.SetStatus(400)
 		return controller.RenderJSON(err.Error());
 	}
 
-	return controller.RenderJSON(users)
+	return controller.RenderJSON(zonePoints)
 }
 
-type statisticsModel struct {
+type clearZonePointsModels struct {
 	token string
-	emailUser string
 }
 
-func (controller StatisticsController) Statistics() revel.Result {
-	model := statisticsModel{}
-	model.token = controller.Params.Get("token");
-	model.emailUser = controller.Params.Get("emailUser")
+func (controller ZonePointController) ClearZonePoints() revel.Result {
+	var jsonData map[string] string
+	controller.Params.BindJSON(&jsonData)
+
+	model := clearZonePointsModels{}
+	model.token = jsonData["token"]
 
 	tokenValid, isAdmin, _, err := ValidateToken(model.token)
 	if err != nil {
@@ -74,25 +75,36 @@ func (controller StatisticsController) Statistics() revel.Result {
 		return controller.RenderJSON("user not admin");
 	}
 
-	statisticsBl := bl.NewStatisticsForMovementBl(model.emailUser)
+	zonePointBl := bl.NewZonePointEmptyBl()
 
-	droneMovements, err := statisticsBl.GetDroneMovementsForUser()
+	err = zonePointBl.CreateNewAllPoints()
 	if err != nil {
 		app.Logs.Print(err)
 		controller.Response.SetStatus(400)
 		return controller.RenderJSON(err.Error());
 	}
 
-	return controller.RenderJSON(droneMovements)
+	return controller.RenderJSON(nil)
 }
 
-type eventsModel struct {
+type updateZonePointsModels struct {
 	token string
+	id int
+	minHeight int
+	maxHeight int
+	forbidden bool
 }
 
-func (controller StatisticsController) Events() revel.Result {
-	model := eventsModel{}
-	model.token = controller.Params.Get("token");
+func (controller ZonePointController) UpdateZonePoints() revel.Result {
+	var jsonData map[string] interface{}
+	controller.Params.BindJSON(&jsonData)
+
+	model := updateZonePointsModels{}
+	model.token = jsonData["token"].(string)
+	model.id = int(jsonData["id"].(float64))
+	model.minHeight = int(jsonData["minHeight"].(float64))
+	model.maxHeight = int(jsonData["maxHeight"].(float64))
+	model.forbidden = jsonData["forbidden"].(bool)
 
 	tokenValid, isAdmin, _, err := ValidateToken(model.token)
 	if err != nil {
@@ -111,14 +123,14 @@ func (controller StatisticsController) Events() revel.Result {
 		return controller.RenderJSON("user not admin");
 	}
 
-	statisticsBl := bl.NewStatisticsBl()
+	zonePointBl := bl.NewZonePointUpdateBl(model.id, model.minHeight, model.maxHeight, model.forbidden)
 
-	events, err := statisticsBl.GetEvents()
+	err = zonePointBl.UpdateZonePoint()
 	if err != nil {
 		app.Logs.Print(err)
 		controller.Response.SetStatus(400)
 		return controller.RenderJSON(err.Error());
 	}
 
-	return controller.RenderJSON(events)
+	return controller.RenderJSON(nil)
 }

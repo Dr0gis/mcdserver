@@ -21,7 +21,7 @@ var (
 )
 
 func InitDB() {
-	connstring := "Dr0gis:3227@tcp(127.0.0.1:3306)/mcddb"
+	connstring := "Dr0gis:3227@tcp(127.0.0.1:3306)/mcddb?parseTime=true"
 	var err error
 	DB, err = sql.Open("mysql", connstring)
 	if err != nil {
